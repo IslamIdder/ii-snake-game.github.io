@@ -4,15 +4,18 @@
 }
 
 #gameContainer{
-    display: flex;
+    /* display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
+    flex-direction: column; */
+    transform: scale(0.7); /* 0.8 = 80% of original size */
+    transform-origin: top; /* keeps it scaled from the center */
     text-align:center;
 }
 
 #gameBoard{
     border: 3px solid;
+    border-radius: 2em;
 }
 
 #resetBtn{
