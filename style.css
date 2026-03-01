@@ -1,0 +1,26 @@
+:root{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1em;
+}
+
+#gameContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align:center;
+}
+
+#gameBoard{
+    border: 3px solid;
+}
+
+#resetBtn{
+    border: 1px solid black;
+    border-radius: 1em;
+    width: 10em;
+    height: 3em;
+    color: white;
+    font-size: 1em;
+    background-color: tomato;
+}
