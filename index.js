@@ -55,6 +55,18 @@ let accumulator = 0;
 const snakeStep = 200; // bigger = slower snake
 
 window.addEventListener("keydown", changeDirection);
+document.getElementById("up").addEventListener("click", () => {
+  if (yVelocity !== unitSize) {yVelocity = -unitSize; xVelocity = 0;};
+});
+document.getElementById("down").addEventListener("click", () => {
+  if (yVelocity !== -unitSize) {yVelocity = unitSize; xVelocity = 0;};
+});
+document.getElementById("left").addEventListener("click", () => {
+  if (xVelocity !== unitSize) {xVelocity = -unitSize; yVelocity = 0;};
+});
+document.getElementById("right").addEventListener("click", () => {
+  if (xVelocity !== -unitSize) {xVelocity = unitSize; yVelocity = 0;};
+});
 window.addEventListener("keydown", (e) =>{
     if (e.code === "Escape") resetGame();
 });

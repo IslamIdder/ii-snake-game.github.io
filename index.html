@@ -10,13 +10,22 @@
 <body>
     <div id="gameContainer">
         <canvas id="gameBoard" width="1000" height="1000">
-
         </canvas>
         <div class="scoreHolder">
         <div>Score: </div>
         <div id="score">0</div>
         </div>
         <button id="resetBtn">Reset</button>
+        <div class="controls">
+            <button style="visibility: hidden;"></button>
+            <button class="controlBtn"  id="up">↑</button>
+            <button style="visibility: hidden;"></button>
+            <button class="controlBtn"  id="left">←</button>
+            <button class="controlBtn"  id="right">→</button>
+            <button style="visibility: hidden;"></button>
+            <button style="visibility: hidden;"></button>
+            <button class="controlBtn"  id="down">↓</button>
+        </div>
     </div>
     <script src="index.js"></script>
 </body>
