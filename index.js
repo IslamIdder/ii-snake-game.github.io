@@ -5,13 +5,14 @@ const resetBtn = document.getElementById('resetBtn');
 const gameWidth = gameBoard.width;
 const gameHeight = gameBoard.height;
 const boardBackground = 'white';
-const snakeColor = 'lightgreen';
-const snakeBorder = 'darkgreen';
+const snakeColor = '#5A9FBC';
+const snakeBorder = '#37657C';
 const unitSize = 100;
-document.body.style.overflow = 'hidden'
+// document.body.style.overflow = 'hidden'
 let running = false;
 let paused = false;
-let speed = 80;
+let gameOver = false;
+let speed = 75;
 let xVelocity = unitSize;
 let yVelocity = 0;
 let foodX;
@@ -24,10 +25,34 @@ let snake = [
     {x:unitSize, y: 0},
     {x:0, y: 0},
 ]
+
+
+
 let timeout;
 let directionChanged = false;
-const img = new Image();
-    img.src = 'assets/images/snorlax smile.png'; // Replace with your image path or URL
+const foodPic = new Image();
+    foodPic.src = 'assets/images/image.png'; 
+
+
+const snorlaxUp = new Image();
+    snorlaxUp.src = 'assets/images/snorlax-neutral-up.jpg'; 
+const snorlaxDown = new Image();
+    snorlaxDown.src = 'assets/images/snorlax-neutral-down.jpg'; 
+const snorlaxRight = new Image();
+    snorlaxRight.src = 'assets/images/snorlax-neutral-right.jpg'; 
+const snorlaxLeft = new Image();
+    snorlaxLeft.src = 'assets/images/snorlax-neutral-left.jpg'; 
+
+const audio = new Audio("assets/audio/audio_snorlax.ogg");
+audio.volume = 0.1; 
+audio.playbackRate = 0.8;
+
+let directionQueue = [];
+
+
+let lastTime = 0;
+let accumulator = 0;
+const snakeStep = 200; // bigger = slower snake
 
 window.addEventListener("keydown", changeDirection);
 window.addEventListener("keydown", (e) =>{
@@ -45,13 +70,32 @@ gameStart();
 createFood();
 drawFood();
 
+function playSound(sound) {
+  sound.pause();          
+  sound.currentTime = 0;  
+  sound.play();           
+}
+
+function checkDirection(){
+   if (yVelocity == -unitSize) return "UP";
+   if (yVelocity == unitSize) return "DOWN";
+   if (xVelocity == unitSize) return "RIGHT";
+   if (xVelocity == -unitSize) return "LEFT";
+}
+
+
+
 function gameStart() {
-    running = true;
     paused = false;
+    gameOver = false;
+    running = true;
     scoreText.textContent = score;
     createFood();
     drawFood();
-    nextTick();
+    lastTime = performance.now();
+    accumulator = 0;
+    requestAnimationFrame(gameLoop);
+    // nextTick();
 }
 
 function nextTick() {
@@ -84,7 +128,34 @@ function nextTick() {
     // Schedule the next tick
     timeout = setTimeout(nextTick, speed);
 }
+function gameLoop(timestamp) {
+    if (!running) {
+        displayGameOver();
+        return;
+    }
 
+    // Time since last frame
+    const deltaTime = timestamp - lastTime;
+    lastTime = timestamp;
+
+    if (!paused) {
+        accumulator += deltaTime;
+
+        // Update game logic only every "speed" ms
+        while (accumulator >= speed) {
+            moveSnake();
+            checkGameOver();
+            accumulator -= speed;
+        }
+    }
+
+    // Render EVERY frame (high FPS)
+    clearBoard();
+    drawFood();
+    drawSnake();
+
+    requestAnimationFrame(gameLoop);
+}
 function clearBoard() {
     ctx.fillStyle = boardBackground;
     ctx.fillRect(0, 0, gameWidth, gameHeight);
@@ -125,7 +196,7 @@ function drawFood() {
     // ctx.stroke();                    // Draw the border
     // img.onload = function() {
       // Draw the image on the canvas at position (x, y) with optional width and height
-      ctx.drawImage(img, foodX, foodY, unitSize, unitSize); // x=50, y=50, width=200, height=200
+      ctx.drawImage(foodPic, foodX, foodY, unitSize, unitSize); // x=50, y=50, width=200, height=200
     // };
 }
 
@@ -153,10 +224,11 @@ function moveSnake() {
         default: head = {x: snake[0].x + xVelocity, 
                   y: snake[0].y + yVelocity};
     }
-   
-    // console.log(head)
     snake.unshift(head);
+
+    // check if snake has eaten the food
     if(snake[0].x == foodX && snake[0].y == foodY){
+        playSound(audio);
         score+= 1; 
         scoreText.textContent = score;
         createFood();
@@ -173,10 +245,28 @@ function drawSnake() {
         ctx.fillRect(snakePart.x, snakePart.y, unitSize, unitSize)
         ctx.strokeRect(snakePart.x, snakePart.y, unitSize, unitSize)
     })
+
+    switch(checkDirection()){
+        case "UP":
+            ctx.drawImage(snorlaxUp, snake[0].x, snake[0].y, unitSize, unitSize);   
+            break;
+        case "DOWN":
+            ctx.drawImage(snorlaxDown, snake[0].x, snake[0].y, unitSize, unitSize);   
+            break;  
+        case "RIGHT":   
+            ctx.drawImage(snorlaxRight, snake[0].x, snake[0].y, unitSize, unitSize);   
+            break;
+        case "LEFT":
+            ctx.drawImage(snorlaxLeft, snake[0].x, snake[0].y, unitSize, unitSize);   
+            break;
+    }
 }
 
 function changeDirection(event) {
-    if(directionChanged) return;
+    event.preventDefault();
+    if(directionChanged) {
+        return
+    };
     const keyPressed = event.keyCode;
     
     const LEFT = 37;
@@ -215,11 +305,14 @@ function changeDirection(event) {
 function checkGameOver() {
     for(let i = 1; i < snake.length; i+=1){
         if(snake[i].x == snake[0].x && snake[i].y == snake[0].y){
-            running = false;}
+            running = false;
+            gameOver = true;
+        }
     }
 }
 
 function togglePause() {
+    if(gameOver) return;
     ctx.font = "50px MV Boli";
     ctx.fillStyle = "black";
     ctx.textAlign = "center";
